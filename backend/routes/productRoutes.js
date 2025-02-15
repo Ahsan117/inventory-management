@@ -6,7 +6,7 @@ const router = express.Router();
 router.post("/", async (req, res) => {
   try {
     const { name, price, category, stock } = req.body;
-    const product = new Product({ name, price, category, stock });
+    const product = new Product({ name, price, category, stock, soldOut: false });
     await product.save();
     res.status(201).json(product);
   } catch (error) {
@@ -14,10 +14,28 @@ router.post("/", async (req, res) => {
   }
 });
 
-// 🔵 Fetch All Products
+// 🔵 Fetch All Products (with Search & Filter)
 router.get("/", async (req, res) => {
   try {
-    const products = await Product.find();
+    const { search, category, minStock } = req.query;
+    let filter = {};
+
+    // Search by product name
+    if (search) {
+      filter.name = { $regex: search, $options: "i" };
+    }
+
+    // Filter by category
+    if (category) {
+      filter.category = category;
+    }
+
+    // Stock alert: Filter products with low stock
+    if (minStock) {
+      filter.stock = { $lte: Number(minStock) };
+    }
+
+    const products = await Product.find(filter);
     res.json(products);
   } catch (error) {
     res.status(500).json({ error: "Error fetching products" });
@@ -34,13 +52,17 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
-// 🟡 Mark Product as Sold Out
+// 🟡 Toggle Sold-Out Status (Fix)
 router.put("/:id/soldout", async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
-    product.soldOut = true;
+    if (!product) {
+      return res.status(404).json({ error: "Product not found" });
+    }
+
+    product.soldOut = !product.soldOut; // Toggle sold-out status
     await product.save();
-    res.json(product);
+    res.json({ message: "Sold-out status updated", product });
   } catch (error) {
     res.status(500).json({ error: "Error updating product" });
   }

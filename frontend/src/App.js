@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { getProducts, addProduct, deleteProduct, toggleSoldOut } from "./api";
-import { Button, TextField, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, Box } from "@mui/material";
+import { 
+  Button, TextField, Table, TableBody, TableCell, 
+  TableContainer, TableHead, TableRow, Paper, Typography, Box 
+} from "@mui/material";
 
 const App = () => {
   const [products, setProducts] = useState([]);
@@ -10,6 +13,8 @@ const App = () => {
     category: "",
     stock: "",
   });
+
+  const [searchTerm, setSearchTerm] = useState(""); // 🔹 Search State
 
   useEffect(() => {
     fetchProducts();
@@ -40,13 +45,28 @@ const App = () => {
     fetchProducts();
   };
 
+  // 🔹 Filter Products based on Search
+  const filteredProducts = products.filter((product) =>
+    product.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <Box sx={{ padding: "30px", maxWidth: "900px", margin: "auto", textAlign: "center" }}>
       <Typography variant="h4" gutterBottom color="primary">
         Inventory Management System
       </Typography>
 
-      {/* Input Form */}
+      {/* 🔹 Search Bar */}
+      <TextField
+        label="Search Products"
+        variant="outlined"
+        size="small"
+        sx={{ marginBottom: "20px", width: "60%" }}
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+      />
+
+      {/* 🔹 Input Form */}
       <Box sx={{ display: "flex", gap: "10px", justifyContent: "center", marginBottom: "20px", flexWrap: "wrap" }}>
         <TextField label="Product Name" variant="outlined" size="small" value={newProduct.name} onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })} />
         <TextField label="Price" type="number" variant="outlined" size="small" value={newProduct.price} onChange={(e) => setNewProduct({ ...newProduct, price: e.target.value })} />
@@ -57,9 +77,9 @@ const App = () => {
         </Button>
       </Box>
 
-      {/* Product List Table */}
-      {products.length === 0 ? (
-        <Typography variant="body1" color="textSecondary">No products available</Typography>
+      {/* 🔹 Product List Table */}
+      {filteredProducts.length === 0 ? (
+        <Typography variant="body1" color="textSecondary">No products found</Typography>
       ) : (
         <TableContainer component={Paper} elevation={3}>
           <Table>
@@ -73,14 +93,23 @@ const App = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {products.map((product) => (
+              {filteredProducts.map((product) => (
                 <TableRow key={product._id} hover>
                   <TableCell>{product.name}</TableCell>
                   <TableCell>${product.price}</TableCell>
                   <TableCell>{product.category}</TableCell>
-                  <TableCell>{product.stock}</TableCell>
+                  {/* 🔹 Stock Alert (Highlight low stock in red) */}
+                  <TableCell sx={{ color: product.stock <= 5 ? "red" : "inherit", fontWeight: product.stock <= 5 ? "bold" : "normal" }}>
+                    {product.stock}
+                  </TableCell>
                   <TableCell>
-                    <Button variant="contained" color={product.soldOut ? "success" : "warning"} size="small" onClick={() => handleToggleSoldOut(product._id)} sx={{ marginRight: "10px" }}>
+                    <Button
+                      variant="contained"
+                      color={product.soldOut ? "success" : "warning"}
+                      size="small"
+                      onClick={() => handleToggleSoldOut(product._id)}
+                      sx={{ marginRight: "10px" }}
+                    >
                       {product.soldOut ? "Restock" : "Mark Sold Out"}
                     </Button>
                     <Button variant="contained" color="secondary" size="small" onClick={() => handleDelete(product._id)}>

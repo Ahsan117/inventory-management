@@ -1,18 +1,22 @@
+/* 🔹 Global Styles */
 .App {
   text-align: center;
 }
 
+/* 🔹 Logo Animation */
 .App-logo {
   height: 40vmin;
   pointer-events: none;
 }
 
+/* Enable smooth spinning animation */
 @media (prefers-reduced-motion: no-preference) {
   .App-logo {
     animation: App-logo-spin infinite 20s linear;
   }
 }
 
+/* 🔹 Header Styling */
 .App-header {
   background-color: #282c34;
   min-height: 100vh;
@@ -24,10 +28,18 @@
   color: white;
 }
 
+/* 🔹 Link Styling */
 .App-link {
   color: #61dafb;
+  text-decoration: none;
+  transition: color 0.3s ease-in-out;
 }
 
+.App-link:hover {
+  color: #4fa3d1;
+}
+
+/* 🔹 Keyframes Animation */
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg);
